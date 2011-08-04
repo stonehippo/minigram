@@ -164,6 +164,12 @@
             currentObject = null;
           }
         });
+        $(canvas).bind('mousemove', function(e) {
+          if (editableIndex != null) {
+            objects[editableIndex].origin = {x: e.pageX - 60, y: e.pageY};
+            redraw();
+          }
+        });
         $(canvas).dblclick(detectActivate);
         $('#clear').click(clear);
         $('#reload').click(function() {reload(0);});
