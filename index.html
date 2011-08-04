@@ -23,7 +23,8 @@
     <div id="gallery">
     </div>
     <canvas id="canvas"></canvas>
-    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.2.min.js"></script>
+    <!-- <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.2.min.js"></script> -->
+    <script src="jquery-1.5.1.js"></script>
     <script>
       document.body.addEventListener('touchmove', function(event) {
         event.preventDefault();
@@ -130,7 +131,7 @@
         canvas.height =  window.innerHeight;
         canvas.width = window.innerWidth-60;
         $('#gallery').css('width', canvas.width);
-        canvas.addEventListener('mousedown', function(e) {
+        $(canvas).bind('mousedown', function(e) {
           e.preventDefault();
           if (editableIndex != null) {
             return;
@@ -139,8 +140,8 @@
              currentObject = {type: 'rect', origin: {x: e.pageX - 60, y: e.pageY}, size: {x: 0, y: 0}};
              clickTimer = null;
           }, 250);
-        }, false);
-        canvas.addEventListener('mouseup', function(e) {
+        });
+        $(canvas).bind('mouseup', function(e) {
           var point = {x: e.pageX - 60, y: e.pageY};
           e.preventDefault();
           if (clickTimer) {
@@ -162,7 +163,7 @@
             addObject(currentObject);
             currentObject = null;
           }
-        }, false);
+        });
         $(canvas).dblclick(detectActivate);
         $('#clear').click(clear);
         $('#reload').click(function() {reload(0);});
