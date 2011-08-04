@@ -19,6 +19,9 @@
       <button id="reload">reload</button>
       <button id="clear">clear</button>
       <button id="gallery_toggle">gallery</button>
+      <button id="up">up</button>
+      <button id="down">down</button>
+      <button id="delete">delete</button>
     </div>
     <div id="gallery">
     </div>
@@ -79,9 +82,41 @@
               editableIndex = null;
               redraw();
             },
-            deleteObject = function(obj) {},
-            moveObjectUp = function(obj) {},
-            moveObjectDown = function(obj) {},
+            deleteObject = function(obj) {
+              if (editableIndex == null) {
+                return;
+              }
+              objects.splice(editableIndex, 1);
+              dismissEdit();
+            },
+            moveUp = function(obj) {
+              if (editableIndex == null) {
+                return;
+              }
+              var obj = objects[editableIndex],
+                  tmp = null;
+              if (editableIndex != 0) {
+                tmp = objects[editableIndex - 1];
+                objects[editableIndex - 1] = obj;
+                objects[editableIndex] = tmp;
+                editableIndex--;
+                redraw();
+              }
+            },
+            moveDown = function(obj) {
+              if (editableIndex == null) {
+                return;
+              }
+              var obj = objects[editableIndex],
+                  tmp = null;
+              if (editableIndex < objects.length - 1) {
+                tmp = objects[editableIndex + 1];
+                objects[editableIndex + 1] = obj;
+                objects[editableIndex] = tmp;
+                editableIndex++;
+                redraw();
+              }
+            },
             drawBounds = function (obj) {
               context.strokeStyle = "#666";
               context.lineWidth = 0.5;
@@ -170,7 +205,6 @@
         $(canvas).bind('mousemove', function(e) {
           e.preventDefault();
           if (editableIndex != null && enableDrag) {
-            console.log()
             objects[editableIndex].origin = {x: e.pageX - 60, y: e.pageY};
             redraw();
           }
@@ -180,6 +214,9 @@
         $('#reload').click(function() {reload(0);});
         $('#gallery_toggle').click(function () {$('#gallery').slideToggle()})
         $('#save').click(save);
+        $('#up').click(moveUp);
+        $('#down').click(moveDown);
+        $('#delete').click(deleteObject);
       });
     </script>
   </body> 
