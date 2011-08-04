@@ -36,6 +36,7 @@
             currentObject = null,
             clickTimer = null,
             editableIndex = null,
+            enableDrag = false,
             colorValue = function() {
               return Math.round(Math.random() * 255);
             },
@@ -134,6 +135,7 @@
         $(canvas).bind('mousedown', function(e) {
           e.preventDefault();
           if (editableIndex != null) {
+            enableDrag = true;
             return;
           }
           clickTimer = setTimeout(function() {
@@ -163,9 +165,12 @@
             addObject(currentObject);
             currentObject = null;
           }
+          enableDrag = false;
         });
         $(canvas).bind('mousemove', function(e) {
-          if (editableIndex != null) {
+          e.preventDefault();
+          if (editableIndex != null && enableDrag) {
+            console.log()
             objects[editableIndex].origin = {x: e.pageX - 60, y: e.pageY};
             redraw();
           }
