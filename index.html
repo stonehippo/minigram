@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content ="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=1">
+    <title>Minigram</title>
+    <style>
+      html, body {height: 100%;margin: 0;}
+      #palette {min-height: 100%; width: 60px; background-color: #333; text-align: center;}
+      #canvas {position: absolute; min-height: 100%; top: 0; left: 60px;}
+      #gallery {z-index: 100; display: none; position: absolute; height: 120px; bottom: 0; left: 60px; background-color: rgba(33,33,33, 0.75);}
+      #gallery img {margin: 10px 10px 0 10px;}
+      button {margin: 20px 0;}
+    </style>
+  </head>
+  <body>
+    <div id="palette">
+      <button id="save">save</button>
+      <button id="reload">reload</button>
+      <button id="clear">clear</button>
+      <button id="gallery_toggle">gallery</button>
+    </div>
+    <div id="gallery">
+    </div>
+    <canvas id="canvas"></canvas>
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.2.min.js"></script>
+    <script>
+      document.body.addEventListener('touchmove', function(event) {
+        event.preventDefault();
+      }, false);
+      $(document).ready(function() {
+        var canvas = document.getElementById('canvas'),
+            context = canvas.getContext('2d'),
+            objects = [],
+            currentObject = null,
+            clickTimer = null,
+            editableIndex = null,
+            colorValue = function() {
+              return Math.round(Math.random() * 255);
+            },
+            opacity = function() {
+              return Math.random();
+            } 
+            randomColor = function() {
+               return "rgba(" + colorValue() + "," + colorValue() + "," + colorValue() + "," + opacity() + ")";
+            },
+            addObject = function(obj) {
+              var obj = {type: obj.type, origin: obj.origin, size: obj.size, style: randomColor()};
+              objects.unshift(obj);
+              draw(obj);
+            },
+            isInBounds = function(point, obj) {
+              if ((point.x - 60 >= obj.origin.x && point.x - 60 <= obj.size.x + obj.origin.x) && (point.y >= obj.origin.y && point.y <= obj.size.y + obj.origin.y)) {
+                return true;
+              }
+              return false;
+            }
+            detectActivate = function(e) {
+              e.preventDefault();
+              var point = {x: e.pageX, y: e.pageY};
+              $(objects).each(function(index, obj) {
+                if (isInBounds(point, obj)) {
+                  if (editableIndex == index) {
+                    dismissEdit();
+                  } else {
+                    enableEdit(index);
+                  }
+                  return false;
+                }
+              });
+            },
+            enableEdit = function (index) {
+              editableIndex = index;
+              redraw();
+            },
+            dismissEdit = function () {
+              editableIndex = null;
+              redraw();
+            },
+            deleteObject = function(obj) {},
+            moveObjectUp = function(obj) {},
+            moveObjectDown = function(obj) {},
+            drawBounds = function (obj) {
+              context.strokeStyle = "#666";
+              context.lineWidth = 0.5;
+              context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6);
+            },
+            draw = function (obj) {
+              var origin = obj.origin,
+                  size = obj.size;
+              context.fillStyle = obj.style;
+              context.fillRect(origin.x, origin.y, size.x, size.y);
+            },
+            redraw = function () {
+              var count = objects.length
+              wipe();
+              for (count;count--;) {
+                draw(objects[count]);
+                if (count == editableIndex) {
+                  drawBounds(objects[count]);
+                }
+              }
+            },
+            save = function () {
+              var saves = localStorage.saves ? JSON.parse(localStorage.saves) : [],
+                  img = new Image();
+              saves.push(objects);
+              img.src = canvas.toDataURL();
+              img.height = 100;
+              $(img).css('background-color', '#fff');
+              $('#gallery').append(img);
+              localStorage.saves = JSON.stringify(saves);
+            },
+            reload = function (index) {
+              var saves = JSON.parse(localStorage.saves);
+              objects = saves[index];
+              editableIndex = null;
+              currentObject = null;
+              redraw();
+            }
+            wipe = function () {
+              context.clearRect(0, 0, canvas.width, canvas.height);
+            },
+            clear = function() {
+              if (confirm("This will delete all objects. Are you sure?")) {
+                objects = [];
+                wipe();
+              }
+            };
+        canvas.height =  window.innerHeight;
+        canvas.width = window.innerWidth-60;
+        $('#gallery').css('width', canvas.width);
+        canvas.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          if (editableIndex != null) {
+            return;
+          }
+          clickTimer = setTimeout(function() {
+             currentObject = {type: 'rect', origin: {x: e.pageX - 60, y: e.pageY}, size: {x: 0, y: 0}};
+             clickTimer = null;
+          }, 250);
+        }, false);
+        canvas.addEventListener('mouseup', function(e) {
+          var point = {x: e.pageX - 60, y: e.pageY};
+          e.preventDefault();
+          if (clickTimer) {
+            clearTimeout(clickTimer);
+          }
+          if (currentObject) {
+            if (point.x < currentObject.origin.x) {
+              currentObject.size.x = currentObject.origin.x - point.x;
+              currentObject.origin.x = point.x;
+            } else {
+              currentObject.size.x =  point.x - currentObject.origin.x;
+            }
+            if (point.y < currentObject.origin.y) {
+              currentObject.size.y = currentObject.origin.y - point.y;
+              currentObject.origin.y = point.y;
+            } else {
+              currentObject.size.y =  point.y - currentObject.origin.y;
+            }
+            addObject(currentObject);
+            currentObject = null;
+          }
+        }, false);
+        $(canvas).dblclick(detectActivate);
+        $('#clear').click(clear);
+        $('#reload').click(function() {reload(0);});
+        $('#gallery_toggle').click(function () {$('#gallery').slideToggle()})
+        $('#save').click(save);
+      });
+    </script>
+  </body> 
+</html>
