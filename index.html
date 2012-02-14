@@ -40,6 +40,7 @@
             clickTimer = null,
             editableIndex = null,
             enableDrag = false,
+            offsets = null,
             up = $('#up')[0],
             down = $('#down')[0],
             del = $('#delete')[0],
@@ -173,9 +174,16 @@
         canvas.width = window.innerWidth-60;
         $('#gallery').css('width', canvas.width);
         $(canvas).bind('mousedown', function(e) {
+          var o = objects[editableIndex],
+            x = e.pageX,
+            y = e.pageY;
           e.preventDefault();
-          if (editableIndex != null) {
+          if (editableIndex != null && isInBounds({x:x, y:y}, o)) {
             enableDrag = true;
+            offsets = {x:x - o.origin.x - 60, y:y - o.origin.y};
+            console.log(o.origin, offsets);
+          }
+          if (editableIndex != null) {
             return;
           }
           clickTimer = setTimeout(function() {
@@ -206,11 +214,15 @@
             currentObject = null;
           }
           enableDrag = false;
+          offsets = null;
         });
         $(canvas).bind('mousemove', function(e) {
+          var o = objects[editableIndex],
+            x = e.pageX - 60,
+            y = e.pageY;
           e.preventDefault();
           if (editableIndex != null && enableDrag) {
-            objects[editableIndex].origin = {x: e.pageX - 60, y: e.pageY};
+            o.origin = {x: x - offsets.x, y: y - offsets.y};
             redraw();
           }
         });
