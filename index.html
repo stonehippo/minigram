@@ -19,9 +19,9 @@
       <button id="reload">reload</button>
       <button id="clear">clear</button>
       <button id="gallery_toggle">gallery</button>
-      <button id="up">up</button>
-      <button id="down">down</button>
-      <button id="delete">delete</button>
+      <button id="up" disabled>up</button>
+      <button id="down" disabled>down</button>
+      <button id="delete" disabled>delete</button>
     </div>
     <div id="gallery">
     </div>
@@ -40,6 +40,9 @@
             clickTimer = null,
             editableIndex = null,
             enableDrag = false,
+            up = $('#up')[0],
+            down = $('#down')[0],
+            del = $('#delete')[0],
             colorValue = function() {
               return Math.round(Math.random() * 255);
             },
@@ -76,10 +79,12 @@
             },
             enableEdit = function (index) {
               editableIndex = index;
+              up.disabled=down.disabled=del.disabled=false;
               redraw();
             },
             dismissEdit = function () {
               editableIndex = null;
+              up.disabled=down.disabled=del.disabled=true;
               redraw();
             },
             deleteObject = function(obj) {
@@ -139,8 +144,8 @@
               }
             },
             save = function () {
-              var saves = localStorage.saves ? JSON.parse(localStorage.saves) : [],
-                  img = new Image();
+              var saves = localStorage.saves ? JSON.parse(localStorage.saves) : [];
+              img = new Image();
               saves.push(objects);
               img.src = canvas.toDataURL();
               img.height = 100;
