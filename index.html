@@ -39,6 +39,7 @@
             currentObject = null,
             clickTimer = null,
             editableIndex = null,
+            highlightedIndex = null,
             enableDrag = false,
             offsets = null,
             up = $('#up')[0],
@@ -78,12 +79,29 @@
                 }
               })
             },
+            detectOver = function(e) {
+              e.preventDefault()
+              var point = {x: e.pageX, y: e.pageY}
+              $(objects).each(function(index, obj) {
+                if (isInBounds(point, obj)) {
+                  highlightEditable(index)
+                  return false
+                }
+                highlightedIndex = null
+                redraw()
+              })
+            },
+            highlightEditable = function (index) {
+              highlightedIndex = index
+              redraw()
+            },
             enableEdit = function (index) {
               editableIndex = index
               up.disabled=down.disabled=del.disabled=false
               redraw()
             },
             dismissEdit = function () {
+              highlightedIndex = editableIndex
               editableIndex = null
               up.disabled=down.disabled=del.disabled=true
               redraw()
@@ -123,8 +141,12 @@
                 redraw()
               }
             },
-            drawBounds = function (obj) {
-              context.strokeStyle = "#666"
+            drawBounds = function (obj, style) {
+              if (style == "editable") {
+                context.strokeStyle = "#33f"
+              } else {
+                context.strokeStyle = "#666"
+              }
               context.lineWidth = 0.5
               context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6)
             },
@@ -140,7 +162,10 @@
               for (count;count--;) {
                 draw(objects[count])
                 if (count == editableIndex) {
-                  drawBounds(objects[count])
+                  drawBounds(objects[count], "editable")
+                }
+                if (count == highlightedIndex && count != editableIndex) {
+                    drawBounds(objects[count])
                 }
               }
             },
@@ -258,6 +283,7 @@
             x = e.pageX - 60,
             y = e.pageY
           e.preventDefault()
+          detectOver(e)
           if (editableIndex != null && enableDrag) {
             o.origin = {x: x - offsets.x, y: y - offsets.y}
             redraw()
