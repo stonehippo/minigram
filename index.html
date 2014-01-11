@@ -148,17 +148,17 @@
             save = function () {
               var saves = localStorage.saves ? getSaves() : []
               saves.push(objects)
-              drawInGallery(canvas.toDataURL())
+              drawInGallery(canvas.toDataURL(), saves.length - 1)
               store(saves)
             },
             store = function(saves) {
               localStorage.saves = JSON.stringify(saves)
             }
-            drawInGallery = function(graphic) {
+            drawInGallery = function(graphic, id) {
               img = new Image()
               img.src = graphic
               img.height = 100
-              $(img).css('background-color', '#fff')
+              $(img).css('background-color', '#fff').data("galleryID", id)
               $('#gallery').append(img)
             },
             reload = function (index) {
@@ -175,7 +175,7 @@
                 if (saves = getSaves()) {
                   for (i=0, j = saves.length; i < j; i++) {
                     reload(i)
-                    drawInGallery(canvas.toDataURL())
+                    drawInGallery(canvas.toDataURL(), i)
                     wipe()
                   }
                 }
@@ -273,6 +273,7 @@
         $('#down').click(moveDown)
         $('#delete').click(deleteObject)
         restore()
+        $('#gallery').on("dblclick", "img", function() {reload($(this).data("galleryID"))})
       })
     </script>
   </body> 
