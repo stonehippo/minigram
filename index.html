@@ -147,20 +147,35 @@
             },
             save = function () {
               var saves = localStorage.saves ? JSON.parse(localStorage.saves) : []
-              img = new Image()
               saves.push(objects)
-              img.src = canvas.toDataURL()
+              drawInGallery(canvas.toDataURL())
+              localStorage.saves = JSON.stringify(saves)
+            },
+            drawInGallery = function(graphic) {
+              img = new Image()
+              img.src = graphic
               img.height = 100
               $(img).css('background-color', '#fff')
               $('#gallery').append(img)
-              localStorage.saves = JSON.stringify(saves)
             },
             reload = function (index) {
-              var saves = JSON.parse(localStorage.saves)
-              objects = saves[index]
-              editableIndex = null
-              currentObject = null
-              redraw()
+              if (localStorage.saves) {
+                var saves = JSON.parse(localStorage.saves)
+                objects = saves[index]
+                editableIndex = null
+                currentObject = null
+                redraw()                
+              }
+            },
+            restore = function() {
+              if (localStorage.saves) {
+                var saves = JSON.parse(localStorage.saves)
+                for (i=0, j = saves.length; i < j; i++) {
+                  reload(i)
+                  drawInGallery(canvas.toDataURL())
+                  wipe()
+                }
+              }
             },
             wipe = function () {
               context.clearRect(0, 0, canvas.width, canvas.height)
@@ -234,6 +249,7 @@
         $('#up').click(moveUp)
         $('#down').click(moveDown)
         $('#delete').click(deleteObject)
+        restore()
       })
     </script>
   </body> 
