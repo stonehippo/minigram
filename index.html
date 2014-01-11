@@ -146,11 +146,14 @@
               }
             },
             save = function () {
-              var saves = localStorage.saves ? JSON.parse(localStorage.saves) : []
+              var saves = localStorage.saves ? getSaves() : []
               saves.push(objects)
               drawInGallery(canvas.toDataURL())
-              localStorage.saves = JSON.stringify(saves)
+              store(saves)
             },
+            store = function(saves) {
+              localStorage.saves = JSON.stringify(saves)
+            }
             drawInGallery = function(graphic) {
               img = new Image()
               img.src = graphic
@@ -159,22 +162,42 @@
               $('#gallery').append(img)
             },
             reload = function (index) {
-              if (localStorage.saves) {
-                var saves = JSON.parse(localStorage.saves)
-                objects = saves[index]
-                editableIndex = null
-                currentObject = null
-                redraw()                
-              }
+                var saves
+                if (saves = getSaves()) {
+                  objects = saves[index]
+                  editableIndex = null
+                  currentObject = null
+                  redraw()                
+                }
             },
             restore = function() {
-              if (localStorage.saves) {
-                var saves = JSON.parse(localStorage.saves)
-                for (i=0, j = saves.length; i < j; i++) {
-                  reload(i)
-                  drawInGallery(canvas.toDataURL())
-                  wipe()
+                var saves
+                if (saves = getSaves()) {
+                  for (i=0, j = saves.length; i < j; i++) {
+                    reload(i)
+                    drawInGallery(canvas.toDataURL())
+                    wipe()
+                  }
                 }
+            },
+            getSaves = function() {
+              if (localStorage.saves) {
+                return JSON.parse(localStorage.saves)
+              }
+              return null
+            }
+            destroy = function(index) {
+              var saves
+              if (saves = getSaves()) {
+                $(["#gallery :nth-child(",index + 1,")"].join("")).remove()
+                saves.splice(index, 1)
+                store(saves)
+              }
+            },
+            destroyAll = function() {
+              if (confirm("Destory all saved drawings?")) {
+                $("#gallery").empty()
+                localStorage.removeItem("saves");              
               }
             },
             wipe = function () {
