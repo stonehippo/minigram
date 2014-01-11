@@ -31,8 +31,8 @@
     <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <script>
       document.body.addEventListener('touchmove', function(event) {
-        event.preventDefault();
-      }, false);
+        event.preventDefault()
+      }, false)
       $(document).ready(function() {
         var canvas = document.getElementById('canvas'),
             context = canvas.getContext('2d'),
@@ -46,195 +46,195 @@
             down = $('#down')[0],
             del = $('#delete')[0],
             colorValue = function() {
-              return Math.round(Math.random() * 255);
+              return Math.round(Math.random() * 255)
             },
             opacity = function() {
-              return Math.random();
+              return Math.random()
             } 
             randomColor = function() {
-               return "rgba(" + colorValue() + "," + colorValue() + "," + colorValue() + "," + opacity() + ")";
+               return "rgba(" + colorValue() + "," + colorValue() + "," + colorValue() + "," + opacity() + ")"
             },
             addObject = function(obj) {
-              var obj = {type: obj.type, origin: obj.origin, size: obj.size, style: randomColor()};
-              objects.unshift(obj);
-              draw(obj);
+              var obj = {type: obj.type, origin: obj.origin, size: obj.size, style: randomColor()}
+              objects.unshift(obj)
+              draw(obj)
             },
             isInBounds = function(point, obj) {
               if ((point.x - 60 >= obj.origin.x && point.x - 60 <= obj.size.x + obj.origin.x) && (point.y >= obj.origin.y && point.y <= obj.size.y + obj.origin.y)) {
-                return true;
+                return true
               }
-              return false;
+              return false
             }
             detectActivate = function(e) {
-              e.preventDefault();
-              var point = {x: e.pageX, y: e.pageY};
+              e.preventDefault()
+              var point = {x: e.pageX, y: e.pageY}
               $(objects).each(function(index, obj) {
                 if (isInBounds(point, obj)) {
                   if (editableIndex == index) {
-                    dismissEdit();
+                    dismissEdit()
                   } else {
-                    enableEdit(index);
+                    enableEdit(index)
                   }
-                  return false;
+                  return false
                 }
-              });
+              })
             },
             enableEdit = function (index) {
-              editableIndex = index;
-              up.disabled=down.disabled=del.disabled=false;
-              redraw();
+              editableIndex = index
+              up.disabled=down.disabled=del.disabled=false
+              redraw()
             },
             dismissEdit = function () {
-              editableIndex = null;
-              up.disabled=down.disabled=del.disabled=true;
-              redraw();
+              editableIndex = null
+              up.disabled=down.disabled=del.disabled=true
+              redraw()
             },
             deleteObject = function(obj) {
               if (editableIndex == null) {
-                return;
+                return
               }
-              objects.splice(editableIndex, 1);
-              dismissEdit();
+              objects.splice(editableIndex, 1)
+              dismissEdit()
             },
             moveUp = function(obj) {
               if (editableIndex == null) {
-                return;
+                return
               }
               var obj = objects[editableIndex],
-                  tmp = null;
+                  tmp = null
               if (editableIndex != 0) {
-                tmp = objects[editableIndex - 1];
-                objects[editableIndex - 1] = obj;
-                objects[editableIndex] = tmp;
-                editableIndex--;
-                redraw();
+                tmp = objects[editableIndex - 1]
+                objects[editableIndex - 1] = obj
+                objects[editableIndex] = tmp
+                editableIndex--
+                redraw()
               }
             },
             moveDown = function(obj) {
               if (editableIndex == null) {
-                return;
+                return
               }
               var obj = objects[editableIndex],
-                  tmp = null;
+                  tmp = null
               if (editableIndex < objects.length - 1) {
-                tmp = objects[editableIndex + 1];
-                objects[editableIndex + 1] = obj;
-                objects[editableIndex] = tmp;
-                editableIndex++;
-                redraw();
+                tmp = objects[editableIndex + 1]
+                objects[editableIndex + 1] = obj
+                objects[editableIndex] = tmp
+                editableIndex++
+                redraw()
               }
             },
             drawBounds = function (obj) {
-              context.strokeStyle = "#666";
-              context.lineWidth = 0.5;
-              context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6);
+              context.strokeStyle = "#666"
+              context.lineWidth = 0.5
+              context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6)
             },
             draw = function (obj) {
               var origin = obj.origin,
-                  size = obj.size;
-              context.fillStyle = obj.style;
-              context.fillRect(origin.x, origin.y, size.x, size.y);
+                  size = obj.size
+              context.fillStyle = obj.style
+              context.fillRect(origin.x, origin.y, size.x, size.y)
             },
             redraw = function () {
               var count = objects.length
-              wipe();
+              wipe()
               for (count;count--;) {
-                draw(objects[count]);
+                draw(objects[count])
                 if (count == editableIndex) {
-                  drawBounds(objects[count]);
+                  drawBounds(objects[count])
                 }
               }
             },
             save = function () {
-              var saves = localStorage.saves ? JSON.parse(localStorage.saves) : [];
-              img = new Image();
-              saves.push(objects);
-              img.src = canvas.toDataURL();
-              img.height = 100;
-              $(img).css('background-color', '#fff');
-              $('#gallery').append(img);
-              localStorage.saves = JSON.stringify(saves);
+              var saves = localStorage.saves ? JSON.parse(localStorage.saves) : []
+              img = new Image()
+              saves.push(objects)
+              img.src = canvas.toDataURL()
+              img.height = 100
+              $(img).css('background-color', '#fff')
+              $('#gallery').append(img)
+              localStorage.saves = JSON.stringify(saves)
             },
             reload = function (index) {
-              var saves = JSON.parse(localStorage.saves);
-              objects = saves[index];
-              editableIndex = null;
-              currentObject = null;
-              redraw();
+              var saves = JSON.parse(localStorage.saves)
+              objects = saves[index]
+              editableIndex = null
+              currentObject = null
+              redraw()
             },
             wipe = function () {
-              context.clearRect(0, 0, canvas.width, canvas.height);
+              context.clearRect(0, 0, canvas.width, canvas.height)
             },
             clear = function() {
               if (confirm("This will delete all objects. Are you sure?")) {
-                objects = [];
-                wipe();
+                objects = []
+                wipe()
               }
-            };
-        canvas.height =  window.innerHeight;
-        canvas.width = window.innerWidth-60;
-        $('#gallery').css('width', canvas.width);
+            }
+        canvas.height =  window.innerHeight
+        canvas.width = window.innerWidth-60
+        $('#gallery').css('width', canvas.width)
         $(canvas).bind('mousedown', function(e) {
           var o = objects[editableIndex],
             x = e.pageX,
-            y = e.pageY;
-          e.preventDefault();
+            y = e.pageY
+          e.preventDefault()
           if (editableIndex != null && isInBounds({x:x, y:y}, o)) {
-            enableDrag = true;
-            offsets = {x:x - o.origin.x - 60, y:y - o.origin.y};
+            enableDrag = true
+            offsets = {x:x - o.origin.x - 60, y:y - o.origin.y}
           }
           if (editableIndex != null) {
-            return;
+            return
           }
           clickTimer = setTimeout(function() {
-             currentObject = {type: 'rect', origin: {x: e.pageX - 60, y: e.pageY}, size: {x: 0, y: 0}};
-             clickTimer = null;
-          }, 250);
-        });
+             currentObject = {type: 'rect', origin: {x: e.pageX - 60, y: e.pageY}, size: {x: 0, y: 0}}
+             clickTimer = null
+          }, 250)
+        })
         $(canvas).bind('mouseup', function(e) {
-          var point = {x: e.pageX - 60, y: e.pageY};
-          e.preventDefault();
+          var point = {x: e.pageX - 60, y: e.pageY}
+          e.preventDefault()
           if (clickTimer) {
-            clearTimeout(clickTimer);
+            clearTimeout(clickTimer)
           }
           if (currentObject) {
             if (point.x < currentObject.origin.x) {
-              currentObject.size.x = currentObject.origin.x - point.x;
-              currentObject.origin.x = point.x;
+              currentObject.size.x = currentObject.origin.x - point.x
+              currentObject.origin.x = point.x
             } else {
-              currentObject.size.x =  point.x - currentObject.origin.x;
+              currentObject.size.x =  point.x - currentObject.origin.x
             }
             if (point.y < currentObject.origin.y) {
-              currentObject.size.y = currentObject.origin.y - point.y;
-              currentObject.origin.y = point.y;
+              currentObject.size.y = currentObject.origin.y - point.y
+              currentObject.origin.y = point.y
             } else {
-              currentObject.size.y =  point.y - currentObject.origin.y;
+              currentObject.size.y =  point.y - currentObject.origin.y
             }
-            addObject(currentObject);
-            currentObject = null;
+            addObject(currentObject)
+            currentObject = null
           }
-          enableDrag = false;
-          offsets = null;
-        });
+          enableDrag = false
+          offsets = null
+        })
         $(canvas).bind('mousemove', function(e) {
           var o = objects[editableIndex],
             x = e.pageX - 60,
-            y = e.pageY;
-          e.preventDefault();
+            y = e.pageY
+          e.preventDefault()
           if (editableIndex != null && enableDrag) {
-            o.origin = {x: x - offsets.x, y: y - offsets.y};
-            redraw();
+            o.origin = {x: x - offsets.x, y: y - offsets.y}
+            redraw()
           }
-        });
-        $(canvas).dblclick(detectActivate);
-        $('#clear').click(clear);
-        $('#reload').click(function() {reload(0);});
+        })
+        $(canvas).dblclick(detectActivate)
+        $('#clear').click(clear)
+        $('#reload').click(function() {reload(0);})
         $('#gallery_toggle').click(function () {$('#gallery').slideToggle()})
-        $('#save').click(save);
-        $('#up').click(moveUp);
-        $('#down').click(moveDown);
-        $('#delete').click(deleteObject);
-      });
+        $('#save').click(save)
+        $('#up').click(moveUp)
+        $('#down').click(moveDown)
+        $('#delete').click(deleteObject)
+      })
     </script>
   </body> 
 </html>
