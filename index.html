@@ -40,6 +40,7 @@
             clickTimer = null,
             editableIndex = null,
             highlightedIndex = null,
+            boundingBox = null,
             enableDrag = false,
             offsets = null,
             up = $('#up')[0],
@@ -142,6 +143,7 @@
               }
             },
             drawBounds = function (obj, style) {
+              context.save()
               if (style == "editable") {
                 context.strokeStyle = "#33f"
               } else {
@@ -149,12 +151,44 @@
               }
               context.lineWidth = 0.5
               context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6)
+              context.restore()
             },
             draw = function (obj) {
               var origin = obj.origin,
                   size = obj.size
+              context.save()
               context.fillStyle = obj.style
               context.fillRect(origin.x, origin.y, size.x, size.y)
+              context.restore()
+            },
+            setBoundingBox = function(e) {                
+              if (currentObject) {
+                var point = {x: e.pageX - 60, y: e.pageY}
+                boundingBox = {size:{}, origin:{}}
+                if (point.x < currentObject.origin.x) {
+                  boundingBox.size.x = currentObject.origin.x - point.x
+                  boundingBox.origin.x = point.x
+                } else {
+                  boundingBox.size.x =  point.x - currentObject.origin.x
+                  boundingBox.origin.x = currentObject.origin.x
+                }
+                if (point.y < currentObject.origin.y) {
+                  boundingBox.size.y = currentObject.origin.y - point.y
+                  boundingBox.origin.y = point.y
+                } else {
+                  boundingBox.size.y =  point.y - currentObject.origin.y
+                  boundingBox.origin.y = currentObject.origin.y
+                }
+              }
+            },
+            drawBoundingBox = function() {
+              if (boundingBox) {
+                context.save()
+                context.strokeStyle = "#000"
+                context.lineWidth = 0.5
+                context.strokeRect(boundingBox.origin.x, boundingBox.origin.y, boundingBox.size.x, boundingBox.size.y)
+                context.restore()              
+              }
             },
             redraw = function () {
               var count = objects.length
@@ -167,6 +201,7 @@
                 if (count == highlightedIndex && count != editableIndex) {
                     drawBounds(objects[count])
                 }
+                drawBoundingBox()
               }
             },
             save = function () {
@@ -277,6 +312,8 @@
           }
           enableDrag = false
           offsets = null
+          boundingBox = null
+          redraw()
         })
         $(canvas).bind('mousemove', function(e) {
           var o = objects[editableIndex],
@@ -284,6 +321,7 @@
             y = e.pageY
           e.preventDefault()
           detectOver(e)
+          setBoundingBox(e)
           if (editableIndex != null && enableDrag) {
             o.origin = {x: x - offsets.x, y: y - offsets.y}
             redraw()
