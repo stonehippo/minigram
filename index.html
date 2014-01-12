@@ -199,10 +199,10 @@
                   drawBounds(objects[count], "editable")
                 }
                 if (count == highlightedIndex && count != editableIndex) {
-                    drawBounds(objects[count])
+                  drawBounds(objects[count])
                 }
-                drawBoundingBox()
               }
+              drawBoundingBox()
             },
             save = function () {
               var saves = localStorage.saves ? getSaves() : []
