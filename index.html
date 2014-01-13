@@ -89,7 +89,6 @@
                   return false
                 }
                 highlightedIndex = null
-                redraw()
               })
             },
             highlightEditable = function (index) {
@@ -325,8 +324,8 @@
           setBoundingBox(e)
           if (editableIndex != null && enableDrag) {
             o.origin = {x: x - offsets.x, y: y - offsets.y}
-            redraw()
           }
+          redraw()
         })
         $(canvas).dblclick(detectActivate)
         $('#clear').click(clear)
