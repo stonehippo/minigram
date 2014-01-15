@@ -316,10 +316,7 @@
             return
           }
           clickTimer = setTimeout(function() {
-            currentObject = {type: drawingMode, origin: {x: e.pageX - 60, y: e.pageY}}
-            if (currentObject.type == "rect") {
-              currentObject.size = {x: 0, y: 0}
-            }
+            currentObject = {type: drawingMode, origin: {x: e.pageX - 60, y: e.pageY}, size: {x: 0, y: 0}}
             if (currentObject.type == "line") {
               currentObject.end = {x: 0, y: 0}
             }
@@ -345,21 +342,11 @@
                 currentObject.origin.y = point.y
               } else {
                 currentObject.size.y =  point.y - currentObject.origin.y
-              }              
+              }                            
             }
             if (currentObject.type == "line") {
-              if (point.x < currentObject.origin.x) {
-                currentObject.end.x = currentObject.origin.x - point.x
-                currentObject.origin.x = point.x
-              } else {
-                currentObject.end.x =  point.x - currentObject.origin.x
-              }
-              if (point.y < currentObject.origin.y) {
-                currentObject.end.y = currentObject.origin.y - point.y
-                currentObject.origin.y = point.y
-              } else {
-                currentObject.end.y =  point.y - currentObject.origin.y
-              }
+              currentObject.end.x = point.x
+              currentObject.end.y = point.y
             } 
             addObject(currentObject)
             currentObject = null
