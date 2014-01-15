@@ -46,14 +46,14 @@
             up = $('#up')[0],
             down = $('#down')[0],
             del = $('#delete')[0],
-            colorValue = function() {
+            randomColorValue = function() {
               return Math.round(Math.random() * 255)
             },
-            opacity = function() {
+            randomOpacity = function() {
               return Math.random()
             }, 
             randomColor = function() {
-               return "rgba(" + colorValue() + "," + colorValue() + "," + colorValue() + "," + opacity() + ")"
+               return "rgba(" + randomColorValue() + "," + randomColorValue() + "," + randomColorValue() + "," + randomOpacity() + ")"
             },
             addObject = function(obj) {
               obj = {type: obj.type, origin: obj.origin, size: obj.size, style: randomColor()}
