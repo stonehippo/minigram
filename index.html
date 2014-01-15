@@ -16,6 +16,9 @@
   </head>
   <body>
     <div id="palette">
+      <button id="rect">rect</button>
+      <button id="line">line</button>
+      <hr>
       <button id="save">save</button>
       <button id="reload">reload</button>
       <button id="clear">clear</button>
@@ -36,6 +39,7 @@
         var canvas = document.getElementById('canvas'),
             context = canvas.getContext('2d'),
             objects = [],
+            drawingMode = "rect",
             currentObject = null,
             clickTimer = null,
             editableIndex = null,
@@ -56,7 +60,7 @@
                return "rgba(" + randomColorValue() + "," + randomColorValue() + "," + randomColorValue() + "," + randomOpacity() + ")"
             },
             addObject = function(obj) {
-              obj = {type: obj.type, origin: obj.origin, size: obj.size, style: randomColor()}
+              obj.style = randomColor()
               objects.unshift(obj)
               draw(obj)
             },
@@ -95,6 +99,9 @@
               highlightedIndex = index
               redraw()
             },
+            setMode = function(mode) {
+              drawingMode = mode
+            }, 
             enableEdit = function (index) {
               editableIndex = index
               up.disabled=down.disabled=del.disabled=false
@@ -152,12 +159,37 @@
               context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6)
               context.restore()
             },
-            draw = function (obj) {
+            draw = function(obj) {
+              var type = obj.type
+              switch(type) {
+                case "line":
+                  drawLine(obj)
+                  break
+                default:
+                  drawRect(obj)
+              }
+            },
+            drawRect = function(obj) {
               var origin = obj.origin,
-                  size = obj.size
+                  size = obj.size,
+                  style = obj.style
               context.save()
-              context.fillStyle = obj.style
+              context.fillStyle = style
               context.fillRect(origin.x, origin.y, size.x, size.y)
+              context.restore()
+            },
+            drawLine = function(obj) {
+              var origin = obj.origin,
+                  end = obj.end,
+                  style = obj.style,
+                  width = obj.width
+              context.save()
+              context.strokeStyle = style
+              context.lineWidth = width
+              context.moveTo(origin.x, origin.y)
+              context.lineTo(end.x, end.y)
+              context.closePath()
+              context.stroke()
               context.restore()
             },
             setBoundingBox = function(e) {                
@@ -284,8 +316,14 @@
             return
           }
           clickTimer = setTimeout(function() {
-             currentObject = {type: 'rect', origin: {x: e.pageX - 60, y: e.pageY}, size: {x: 0, y: 0}}
-             clickTimer = null
+            currentObject = {type: drawingMode, origin: {x: e.pageX - 60, y: e.pageY}}
+            if (currentObject.type == "rect") {
+              currentObject.size = {x: 0, y: 0}
+            }
+            if (currentObject.type == "line") {
+              currentObject.end = {x: 0, y: 0}
+            }
+            clickTimer = null
           }, 250)
         })
         $(canvas).bind('mouseup', function(e) {
@@ -295,18 +333,34 @@
             clearTimeout(clickTimer)
           }
           if (currentObject) {
-            if (point.x < currentObject.origin.x) {
-              currentObject.size.x = currentObject.origin.x - point.x
-              currentObject.origin.x = point.x
-            } else {
-              currentObject.size.x =  point.x - currentObject.origin.x
+            if (currentObject.type == "rect") {
+              if (point.x < currentObject.origin.x) {
+                currentObject.size.x = currentObject.origin.x - point.x
+                currentObject.origin.x = point.x
+              } else {
+                currentObject.size.x =  point.x - currentObject.origin.x
+              }
+              if (point.y < currentObject.origin.y) {
+                currentObject.size.y = currentObject.origin.y - point.y
+                currentObject.origin.y = point.y
+              } else {
+                currentObject.size.y =  point.y - currentObject.origin.y
+              }              
             }
-            if (point.y < currentObject.origin.y) {
-              currentObject.size.y = currentObject.origin.y - point.y
-              currentObject.origin.y = point.y
-            } else {
-              currentObject.size.y =  point.y - currentObject.origin.y
-            }
+            if (currentObject.type == "line") {
+              if (point.x < currentObject.origin.x) {
+                currentObject.end.x = currentObject.origin.x - point.x
+                currentObject.origin.x = point.x
+              } else {
+                currentObject.end.x =  point.x - currentObject.origin.x
+              }
+              if (point.y < currentObject.origin.y) {
+                currentObject.end.y = currentObject.origin.y - point.y
+                currentObject.origin.y = point.y
+              } else {
+                currentObject.end.y =  point.y - currentObject.origin.y
+              }
+            } 
             addObject(currentObject)
             currentObject = null
           }
@@ -328,6 +382,8 @@
           redraw()
         })
         $(canvas).dblclick(detectActivate)
+        $('#line').click(function() {setMode('line')})
+        $('#rect').click(function() {setMode('rect')})
         $('#clear').click(clear)
         $('#reload').click(function() {reload(0);})
         $('#gallery_toggle').click(function () {$('#gallery').slideToggle()})
