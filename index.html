@@ -33,9 +33,11 @@
     <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <script>
       document.body.addEventListener('touchmove', function(event) {
+        "use strict";
         event.preventDefault()
       }, false)
       $(document).ready(function() {
+        "use strict";
         var canvas = document.getElementById('canvas'),
             context = canvas.getContext('2d'),
             objects = [],
@@ -380,6 +382,7 @@
         $('#delete').click(deleteObject)
         restore()
         $('#gallery').on("dblclick", "img", function() {reload($(this).data("galleryID"))})
+        window.myDrawingObjects = objects
       })
     </script>
   </body> 
