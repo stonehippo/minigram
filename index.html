@@ -32,280 +32,280 @@
         <canvas id="canvas"></canvas>
         <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
         <script>
-            document.body.addEventListener('touchmove', function(event) {
+            document.body.addEventListener('touchmove', function (event) {
                 "use strict";
                 event.preventDefault()
             }, false)
-            $(document).ready(function() {
+            $(document).ready(function () {
                 "use strict";
                 var canvas = document.getElementById('canvas'),
-                        context = canvas.getContext('2d'),
-                        objects = [],
-                        drawingMode = "rect",
-                        currentObject = null,
-                        clickTimer = null,
-                        editableIndex = null,
-                        highlightedIndex = null,
-                        boundingBox = null,
-                        enableDrag = false,
-                        offsets = null,
-                        up = $('#up')[0],
-                        down = $('#down')[0],
-                        del = $('#delete')[0],
-                        randomColorValue = function() {
-                            return Math.round(Math.random() * 255)
-                        },
-                        randomOpacity = function() {
-                            return Math.random()
-                        }, 
-                        randomColor = function() {
-                             return "rgba(" + randomColorValue() + "," + randomColorValue() + "," + randomColorValue() + "," + randomOpacity() + ")"
-                        },
-                        addObject = function(obj) {
-                            obj.style = randomColor()
-                            objects.unshift(obj)
-                            draw(obj)
-                        },
-                        isInBounds = function(point, obj) {
-                            if ((point.x - 60 >= obj.origin.x && point.x - 60 <= obj.size.x + obj.origin.x) && (point.y >= obj.origin.y && point.y <= obj.size.y + obj.origin.y)) {
-                                return true
-                            }
-                            return false
-                        },
-                        detectActivate = function(e) {
-                            e.preventDefault()
-                            var point = {x: e.pageX, y: e.pageY}
-                            $(objects).each(function(index, obj) {
-                                if (isInBounds(point, obj)) {
-                                    if (editableIndex == index) {
-                                        dismissEdit()
-                                    } else {
-                                        enableEdit(index)
-                                    }
-                                    return false
+                    context = canvas.getContext('2d'),
+                    objects = [],
+                    drawingMode = "rect",
+                    currentObject = null,
+                    clickTimer = null,
+                    editableIndex = null,
+                    highlightedIndex = null,
+                    boundingBox = null,
+                    enableDrag = false,
+                    offsets = null,
+                    up = $('#up')[0],
+                    down = $('#down')[0],
+                    del = $('#delete')[0],
+                    randomColorValue = function () {
+                        return Math.round(Math.random() * 255)
+                    },
+                    randomOpacity = function () {
+                        return Math.random()
+                    },
+                    randomColor = function () {
+                        return "rgba(" + randomColorValue() + "," + randomColorValue() + "," + randomColorValue() + "," + randomOpacity() + ")"
+                    },
+                    addObject = function (obj) {
+                        obj.style = randomColor()
+                        objects.unshift(obj)
+                        draw(obj)
+                    },
+                    isInBounds = function (point, obj) {
+                        if ((point.x - 60 >= obj.origin.x && point.x - 60 <= obj.size.x + obj.origin.x) && (point.y >= obj.origin.y && point.y <= obj.size.y + obj.origin.y)) {
+                            return true
+                        }
+                        return false
+                    },
+                    detectActivate = function (e) {
+                        e.preventDefault()
+                        var point = {x: e.pageX, y: e.pageY}
+                        $(objects).each(function (index, obj) {
+                            if (isInBounds(point, obj)) {
+                                if (editableIndex == index) {
+                                    dismissEdit()
+                                } else {
+                                    enableEdit(index)
                                 }
-                            })
-                        },
-                        detectOver = function(e) {
-                            e.preventDefault()
-                            var point = {x: e.pageX, y: e.pageY}
-                            $(objects).each(function(index, obj) {
-                                if (isInBounds(point, obj)) {
-                                    highlightEditable(index)
-                                    return false
-                                }
-                                highlightedIndex = null
-                            })
-                        },
-                        highlightEditable = function (index) {
-                            highlightedIndex = index
+                                return false
+                            }
+                        })
+                    },
+                    detectOver = function (e) {
+                        e.preventDefault()
+                        var point = {x: e.pageX, y: e.pageY}
+                        $(objects).each(function (index, obj) {
+                            if (isInBounds(point, obj)) {
+                                highlightEditable(index)
+                                return false
+                            }
+                            highlightedIndex = null
+                        })
+                    },
+                    highlightEditable = function (index) {
+                        highlightedIndex = index
+                        redraw()
+                    },
+                    setMode = function (mode) {
+                        drawingMode = mode
+                    },
+                    enableEdit = function (index) {
+                        editableIndex = index
+                        up.disabled=down.disabled=del.disabled=false
+                        redraw()
+                    },
+                    dismissEdit = function () {
+                        highlightedIndex = editableIndex
+                        editableIndex = null
+                        up.disabled=down.disabled=del.disabled=true
+                        redraw()
+                    },
+                    deleteObject = function () {
+                        if (editableIndex === null) {
+                            return
+                        }
+                        objects.splice(editableIndex, 1)
+                        dismissEdit()
+                    },
+                    moveUp = function () {
+                        if (editableIndex === null) {
+                            return
+                        }
+                        var obj = objects[editableIndex],
+                            tmp = null
+                        if (editableIndex !== 0) {
+                            tmp = objects[editableIndex - 1]
+                            objects[editableIndex - 1] = obj
+                            objects[editableIndex] = tmp
+                            editableIndex--
                             redraw()
-                        },
-                        setMode = function(mode) {
-                            drawingMode = mode
-                        }, 
-                        enableEdit = function (index) {
-                            editableIndex = index
-                            up.disabled=down.disabled=del.disabled=false
+                        }
+                    },
+                    moveDown = function () {
+                        if (editableIndex === null) {
+                            return
+                        }
+                        var obj = objects[editableIndex],
+                            tmp = null
+                        if (editableIndex < objects.length - 1) {
+                            tmp = objects[editableIndex + 1]
+                            objects[editableIndex + 1] = obj
+                            objects[editableIndex] = tmp
+                            editableIndex++
                             redraw()
-                        },
-                        dismissEdit = function () {
-                            highlightedIndex = editableIndex
-                            editableIndex = null
-                            up.disabled=down.disabled=del.disabled=true
-                            redraw()
-                        },
-                        deleteObject = function() {
-                            if (editableIndex === null) {
-                                return
-                            }
-                            objects.splice(editableIndex, 1)
-                            dismissEdit()
-                        },
-                        moveUp = function() {
-                            if (editableIndex === null) {
-                                return
-                            }
-                            var obj = objects[editableIndex],
-                                    tmp = null
-                            if (editableIndex !== 0) {
-                                tmp = objects[editableIndex - 1]
-                                objects[editableIndex - 1] = obj
-                                objects[editableIndex] = tmp
-                                editableIndex--
-                                redraw()
-                            }
-                        },
-                        moveDown = function() {
-                            if (editableIndex === null) {
-                                return
-                            }
-                            var obj = objects[editableIndex],
-                                    tmp = null
-                            if (editableIndex < objects.length - 1) {
-                                tmp = objects[editableIndex + 1]
-                                objects[editableIndex + 1] = obj
-                                objects[editableIndex] = tmp
-                                editableIndex++
-                                redraw()
-                            }
-                        },
-                        drawBounds = function (obj, style) {
-                            context.save()
-                            if (style == "editable") {
-                                context.strokeStyle = "#33f"
+                        }
+                    },
+                    drawBounds = function (obj, style) {
+                        context.save()
+                        if (style == "editable") {
+                            context.strokeStyle = "#33f"
+                        } else {
+                            context.strokeStyle = "#666"
+                        }
+                        context.lineWidth = 0.5
+                        context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6)
+                        context.restore()
+                    },
+                    draw = function (obj) {
+                        var type = obj.type
+                        switch(type) {
+                            case "line":
+                                drawLine(obj)
+                                break
+                            default:
+                                drawRect(obj)
+                        }
+                    },
+                    drawRect = function (obj) {
+                        var origin = obj.origin,
+                            size = obj.size,
+                            style = obj.style
+                        context.save()
+                        context.fillStyle = style
+                        context.fillRect(origin.x, origin.y, size.x, size.y)
+                        context.restore()
+                    },
+                    drawLine = function (obj) {
+                        var origin = obj.origin,
+                            end = obj.end,
+                            style = obj.style,
+                            width = obj.width
+                        context.save()
+                        context.strokeStyle = style
+                        context.lineWidth = width
+                        context.moveTo(origin.x, origin.y)
+                        context.lineTo(end.x, end.y)
+                        context.closePath()
+                        context.stroke()
+                        context.restore()
+                    },
+                    setBoundingBox = function (e) {
+                        if (currentObject) {
+                            var point = {x: e.pageX - 60, y: e.pageY}
+                            boundingBox = {size:{}, origin:{}}
+                            if (point.x < currentObject.origin.x) {
+                                boundingBox.size.x = currentObject.origin.x - point.x
+                                boundingBox.origin.x = point.x
                             } else {
-                                context.strokeStyle = "#666"
+                                boundingBox.size.x =  point.x - currentObject.origin.x
+                                boundingBox.origin.x = currentObject.origin.x
                             }
-                            context.lineWidth = 0.5
-                            context.strokeRect(obj.origin.x - 3, obj.origin.y - 3, obj.size.x + 6, obj.size.y + 6)
-                            context.restore()
-                        },
-                        draw = function(obj) {
-                            var type = obj.type
-                            switch(type) {
-                                case "line":
-                                    drawLine(obj)
-                                    break
-                                default:
-                                    drawRect(obj)
-                            }
-                        },
-                        drawRect = function(obj) {
-                            var origin = obj.origin,
-                                    size = obj.size,
-                                    style = obj.style
-                            context.save()
-                            context.fillStyle = style
-                            context.fillRect(origin.x, origin.y, size.x, size.y)
-                            context.restore()
-                        },
-                        drawLine = function(obj) {
-                            var origin = obj.origin,
-                                    end = obj.end,
-                                    style = obj.style,
-                                    width = obj.width
-                            context.save()
-                            context.strokeStyle = style
-                            context.lineWidth = width
-                            context.moveTo(origin.x, origin.y)
-                            context.lineTo(end.x, end.y)
-                            context.closePath()
-                            context.stroke()
-                            context.restore()
-                        },
-                        setBoundingBox = function(e) {                
-                            if (currentObject) {
-                                var point = {x: e.pageX - 60, y: e.pageY}
-                                boundingBox = {size:{}, origin:{}}
-                                if (point.x < currentObject.origin.x) {
-                                    boundingBox.size.x = currentObject.origin.x - point.x
-                                    boundingBox.origin.x = point.x
-                                } else {
-                                    boundingBox.size.x =  point.x - currentObject.origin.x
-                                    boundingBox.origin.x = currentObject.origin.x
-                                }
-                                if (point.y < currentObject.origin.y) {
-                                    boundingBox.size.y = currentObject.origin.y - point.y
-                                    boundingBox.origin.y = point.y
-                                } else {
-                                    boundingBox.size.y =  point.y - currentObject.origin.y
-                                    boundingBox.origin.y = currentObject.origin.y
-                                }
-                            }
-                        },
-                        drawBoundingBox = function() {
-                            if (boundingBox) {
-                                context.save()
-                                context.strokeStyle = "#000"
-                                context.lineWidth = 0.5
-                                context.strokeRect(boundingBox.origin.x, boundingBox.origin.y, boundingBox.size.x, boundingBox.size.y)
-                                context.restore()              
-                            }
-                        },
-                        redraw = function () {
-                            var count = objects.length
-                            wipe()
-                            for (count;count--;) {
-                                draw(objects[count])
-                                if (count == editableIndex) {
-                                    drawBounds(objects[count], "editable")
-                                }
-                                if (count == highlightedIndex && count != editableIndex) {
-                                    drawBounds(objects[count])
-                                }
-                            }
-                            drawBoundingBox()
-                        },
-                        save = function () {
-                            var saves = localStorage.saves ? getSaves() : []
-                            saves.push(objects)
-                            drawInGallery(canvas.toDataURL(), saves.length - 1)
-                            store(saves)
-                        },
-                        store = function(saves) {
-                            localStorage.saves = JSON.stringify(saves)
-                        },
-                        drawInGallery = function(graphic, id) {
-                            var img = new Image()
-                            img.src = graphic
-                            img.height = 100
-                            $(img).css('background-color', '#fff').data("galleryID", id)
-                            $('#gallery').append(img)
-                        },
-                        reload = function (index) {
-                                var saves = getSaves()
-                                if (saves) {
-                                    objects = saves[index]
-                                    editableIndex = null
-                                    currentObject = null
-                                    redraw()                
-                                }
-                        },
-                        restore = function() {
-                                var saves = getSaves()
-                                if (saves) {
-                                    for (var i=0, j = saves.length; i < j; i++) {
-                                        reload(i)
-                                        drawInGallery(canvas.toDataURL(), i)
-                                        wipe()
-                                    }
-                                    objects = []
-                                }
-                        },
-                        getSaves = function() {
-                            if (localStorage.saves) {
-                                return JSON.parse(localStorage.saves)
-                            }
-                            return null
-                        },
-                        destroy = function(index) {
-                            var saves = getSaves()
-                            if (saves) {
-                                $(["#gallery :nth-child(",index + 1,")"].join("")).remove()
-                                saves.splice(index, 1)
-                                store(saves)
-                            }
-                        },
-                        destroyAll = function() {
-                            if (confirm("Destory all saved drawings?")) {
-                                $("#gallery").empty()
-                                localStorage.removeItem("saves");              
-                            }
-                        },
-                        wipe = function () {
-                            context.clearRect(0, 0, canvas.width, canvas.height)
-                        },
-                        clear = function() {
-                            if (confirm("This will delete all objects. Are you sure?")) {
-                                objects = []
-                                wipe()
+                            if (point.y < currentObject.origin.y) {
+                                boundingBox.size.y = currentObject.origin.y - point.y
+                                boundingBox.origin.y = point.y
+                            } else {
+                                boundingBox.size.y =  point.y - currentObject.origin.y
+                                boundingBox.origin.y = currentObject.origin.y
                             }
                         }
+                    },
+                    drawBoundingBox = function () {
+                        if (boundingBox) {
+                            context.save()
+                            context.strokeStyle = "#000"
+                            context.lineWidth = 0.5
+                            context.strokeRect(boundingBox.origin.x, boundingBox.origin.y, boundingBox.size.x, boundingBox.size.y)
+                            context.restore()
+                        }
+                    },
+                    redraw = function () {
+                        var count = objects.length
+                        wipe()
+                        for (count;count--;) {
+                            draw(objects[count])
+                            if (count == editableIndex) {
+                                drawBounds(objects[count], "editable")
+                            }
+                            if (count == highlightedIndex && count != editableIndex) {
+                                drawBounds(objects[count])
+                            }
+                        }
+                        drawBoundingBox()
+                    },
+                    save = function () {
+                        var saves = localStorage.saves ? getSaves() : []
+                        saves.push(objects)
+                        drawInGallery(canvas.toDataURL(), saves.length - 1)
+                        store(saves)
+                    },
+                    store = function (saves) {
+                        localStorage.saves = JSON.stringify(saves)
+                    },
+                    drawInGallery = function (graphic, id) {
+                        var img = new Image()
+                        img.src = graphic
+                        img.height = 100
+                        $(img).css('background-color', '#fff').data("galleryID", id)
+                        $('#gallery').append(img)
+                    },
+                    reload = function (index) {
+                            var saves = getSaves()
+                            if (saves) {
+                                objects = saves[index]
+                                editableIndex = null
+                                currentObject = null
+                                redraw()
+                            }
+                    },
+                    restore = function () {
+                            var saves = getSaves()
+                            if (saves) {
+                                for (var i=0, j = saves.length; i < j; i++) {
+                                    reload(i)
+                                    drawInGallery(canvas.toDataURL(), i)
+                                    wipe()
+                                }
+                                objects = []
+                            }
+                    },
+                    getSaves = function () {
+                        if (localStorage.saves) {
+                            return JSON.parse(localStorage.saves)
+                        }
+                        return null
+                    },
+                    destroy = function (index) {
+                        var saves = getSaves()
+                        if (saves) {
+                            $(["#gallery :nth-child(",index + 1,")"].join("")).remove()
+                            saves.splice(index, 1)
+                            store(saves)
+                        }
+                    },
+                    destroyAll = function () {
+                        if (confirm("Destory all saved drawings?")) {
+                            $("#gallery").empty()
+                            localStorage.removeItem("saves");
+                        }
+                    },
+                    wipe = function () {
+                        context.clearRect(0, 0, canvas.width, canvas.height)
+                    },
+                    clear = function () {
+                        if (confirm("This will delete all objects. Are you sure?")) {
+                            objects = []
+                            wipe()
+                        }
+                    }
                 canvas.height =  window.innerHeight
                 canvas.width = window.innerWidth-60
                 $('#gallery').css('width', canvas.width)
-                $(canvas).bind('mousedown', function(e) {
+                $(canvas).bind('mousedown', function (e) {
                     var o = objects[editableIndex],
                         x = e.pageX,
                         y = e.pageY
@@ -317,7 +317,7 @@
                     if (editableIndex !== null) {
                         return
                     }
-                    clickTimer = setTimeout(function() {
+                    clickTimer = setTimeout(function () {
                         currentObject = {type: drawingMode, origin: {x: e.pageX - 60, y: e.pageY}, size: {x: 0, y: 0}}
                         if (currentObject.type == "line") {
                             currentObject.end = {x: 0, y: 0}
@@ -325,7 +325,7 @@
                         clickTimer = null
                     }, 250)
                 })
-                $(canvas).bind('mouseup', function(e) {
+                $(canvas).bind('mouseup', function (e) {
                     var point = {x: e.pageX - 60, y: e.pageY}
                     e.preventDefault()
                     if (clickTimer) {
@@ -344,12 +344,12 @@
                                 currentObject.origin.y = point.y
                             } else {
                                 currentObject.size.y =  point.y - currentObject.origin.y
-                            }                            
+                            }
                         }
                         if (currentObject.type == "line") {
                             currentObject.end.x = point.x
                             currentObject.end.y = point.y
-                        } 
+                        }
                         addObject(currentObject)
                         currentObject = null
                     }
@@ -358,7 +358,7 @@
                     boundingBox = null
                     redraw()
                 })
-                $(canvas).bind('mousemove', function(e) {
+                $(canvas).bind('mousemove', function (e) {
                     var o = objects[editableIndex],
                         x = e.pageX - 60,
                         y = e.pageY
@@ -371,19 +371,19 @@
                     redraw()
                 })
                 $(canvas).dblclick(detectActivate)
-                $('#line').click(function() {setMode('line')})
-                $('#rect').click(function() {setMode('rect')})
+                $('#line').click(function () {setMode('line')})
+                $('#rect').click(function () {setMode('rect')})
                 $('#clear').click(clear)
-                $('#reload').click(function() {reload(0);})
+                $('#reload').click(function () {reload(0);})
                 $('#gallery_toggle').click(function () {$('#gallery').slideToggle()})
                 $('#save').click(save)
                 $('#up').click(moveUp)
                 $('#down').click(moveDown)
                 $('#delete').click(deleteObject)
                 restore()
-                $('#gallery').on("dblclick", "img", function() {reload($(this).data("galleryID"))})
+                $('#gallery').on("dblclick", "img", function () {reload($(this).data("galleryID"))})
                 window.myDrawingObjects = objects
             })
         </script>
-    </body> 
+    </body>
 </html>
